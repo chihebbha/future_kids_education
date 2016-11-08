@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from __future__ import division
 from __future__ import print_function
 
@@ -21,6 +22,17 @@ from pyspark.sql import SparkSession
 # $example on:schema_merging$
 from pyspark.sql import Row
 # $example off:schema_merging$
+
+
+
+import plotly.graph_objs as go
+import plotly.plotly as py
+from plotly.tools import FigureFactory as FF
+import numpy as np
+import plotly.tools as tls
+tls.set_credentials_file(username='chihebbha', api_key='ufoo177icv')
+
+
 
 """
 A simple example demonstrating Spark SQL data sources.
@@ -123,6 +135,9 @@ def json_dataset_example(spark):
     # SQL statements can be run by using the sql methods provided by spark
     invoiceDF = spark.sql("SELECT population.date,population.value,population.homme,population.femme from pop")
 
+    datesDS = invoiceDF.rdd.map(lambda row:  row.date)
+    for dates in datesDS.collect():
+        dates=dates
     clientsDS = invoiceDF.rdd.map(lambda row:  row.value)
     somme=0
     difference=0;
@@ -221,6 +236,35 @@ def json_dataset_example(spark):
     print("le nombre des candidat admis en 2020 est : ", resultat2 * 1000)
     print("______________________________________________________________________________________________________________________________________")
 
+    data = [
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=dates,  # more about "x":  /python/reference/#scatter-x
+            y=client,  # more about "y":  /python/reference/#scatter-y
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(16, 32, 77)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        )
+    ]
+
+    layout = go.Layout(  # all "layout" attributes: /python/reference/#layout
+        title="population entre 10 et 14 ans en tunisie",  # more about "layout's" "title": /python/reference/#layout-title
+        xaxis=dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
+            title="time"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+        ),
+        annotations=[
+            dict(  # all "annotation" attributes: /python/reference/#layout-annotations
+                text="simple annotation",  # /python/reference/#layout-annotations-text
+                x=0,  # /python/reference/#layout-annotations-x
+                xref="paper",  # /python/reference/#layout-annotations-xref
+                y=0,  # /python/reference/#layout-annotations-y
+                yref="paper"  # /python/reference/#layout-annotations-yref
+            )
+        ]
+    )
+
+    figure = go.Figure(data=data, layout=layout)
+
+    py.plot(figure, filename='graph')
 
 
 
@@ -228,6 +272,23 @@ def json_dataset_example(spark):
 
 
 
+    # x1 = client
+    # x2 = clientH
+    # x3 = clientF
+    #
+    # hist_data = [x1, x2, x3]
+    #
+    # group_labels = ['Population', 'Population Homme', 'Population Femme']
+    # colors = ['#333F44', '#37AA9C', '#94F3E4']
+    #
+    # # Create distplot with curve_type set to 'normal'
+    # fig = FF.create_distplot(hist_data, group_labels, show_hist=False, colors=colors)
+    #
+    # # Add title
+    # fig['layout'].update(title='Popoulation en Tunisie')
+    #
+    # # Plot!
+    # py.iplot(fig, filename='Popolation en Tunisie', validate=False)
     # invoiceDFa = spark.sql("SELECT population.value from pop")
         # invoiceDFa.show()
         #

@@ -1,0 +1,3 @@
+#!/bin/bash
+konsole --noclose -e cd 'ESPRIT_UBUNTU/5eme/socialAnalytics/workspace/spark-example'
+
