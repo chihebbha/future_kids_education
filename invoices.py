@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from __future__ import division
 from __future__ import print_function
 
@@ -23,16 +22,20 @@ from pyspark.sql import SparkSession
 from pyspark.sql import Row
 # $example off:schema_merging$
 
+from flask import Flask, url_for
+from flask_cors import CORS, cross_origin
 
-
+import json
+import plotly
 import plotly.graph_objs as go
 import plotly.plotly as py
 from plotly.tools import FigureFactory as FF
 import numpy as np
 import plotly.tools as tls
-tls.set_credentials_file(username='chihebbha', api_key='ufoo177icv')
+tls.set_credentials_file(username='rajajlidi', api_key='tmlr1uss2q')
 
 
+resultatAPI={}
 
 """
 A simple example demonstrating Spark SQL data sources.
@@ -213,7 +216,7 @@ def json_dataset_example(spark):
         for i in range(len(client1)):
          somme1=somme1+client1[i]
     moy1=somme1/len(client1)
-    resultat=(moy1+client1[len(client1)-1])/2
+    resultat=(moy1+client1[len(client1)-1])
 
 
     clientsDS2 = invoiceDF1.rdd.map(lambda row: row.valeur2)
@@ -223,43 +226,61 @@ def json_dataset_example(spark):
         for j in range(len(client2)):
             somme2 = somme2 + client2[j]
     moy2 = somme2 / len(client2)
-    resultat2 = (moy2 + client2[len(client2) - 1]) / 2
+    resultat2 = (moy2 + client2[len(client2) - 1])
+    total=(difference + sommes + client[0]) * 500
+    totalH=(differenceH + sommesH + clientH[0] - clientH[1]) * 1000
+    totalF=(differenceF + sommesF + clientF[0] - clientF[1]) * 1000
+    resultatAPI1={"date":2020,"femme":totalF,"value":total,"homme":totalH}
 
-    total=difference + sommes + client[0] * 500
-    totalH=differenceH + sommesH + clientH[0] * 500
-    totalF=differenceF + sommesF + clientF[0] * 500
+    with open('population.json') as json_data:
+        d = json.load(json_data)
+        d['population'].append(resultatAPI)
+
+
+        # file_ = open('populationAPI.json', 'w')
+        # file_.write(d['population'])
+        # file_.close()
+
     print("______________________________________________________________________________________________________________________________________")
-    print("le nombre de population total entre 10 et 14 ans en 2020 est : ", total)
+    print(" le nombre de population total entre 10 et 14 ans en 2020 est : ", total)
     print("le nombre de garcons entre 10 et 14 ans en 2020 est : ", totalH,"  =======>     %.3f"% round((totalH/total)*100,3)," %")
     print("le nombre de filles entre 10 et 14 ans en 2020 est : ", totalF,"  =======>     %.3f"% round((totalF/total)*100,3)," %")
-    print("le nombre des candidat en 2020 est : ", resultat * 1000)
-    print("le nombre des candidat admis en 2020 est : ", resultat2 * 1000)
+    print("le nombre des candidat en 2020 est : ", resultat * 2000 ," ")
+    print("le nombre des candidat admis en 2020 est : ", resultat2 * 2000)
+    print("le taux de reussite en 2020 est : ========>    %.3f"% round((resultat2/resultat)*100,0)," %")
     print("______________________________________________________________________________________________________________________________________")
+
+
 
     data = [
         go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
             x=dates,  # more about "x":  /python/reference/#scatter-x
             y=client,  # more about "y":  /python/reference/#scatter-y
+            name='population',
             marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
-                color="rgb(16, 32, 77)"  # more about marker's "color": /python/reference/#scatter-marker-color
+                color="rgb(0, 0, 0)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=[2015,2020],  # more about "x":  /python/reference/#scatter-x
+            y=[client[0],total/1000],  # more about "y":  /python/reference/#scatter-y
+            name='evolution',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(255, 0, 0)"  # more about marker's "color": /python/reference/#scatter-marker-color
             )
         )
     ]
 
+
     layout = go.Layout(  # all "layout" attributes: /python/reference/#layout
-        title="population entre 10 et 14 ans en tunisie",  # more about "layout's" "title": /python/reference/#layout-title
+        title="population entre 10 et 14 ans en tunisie",
         xaxis=dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
-            title="time"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+            title="Annee"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
         ),
-        annotations=[
-            dict(  # all "annotation" attributes: /python/reference/#layout-annotations
-                text="simple annotation",  # /python/reference/#layout-annotations-text
-                x=0,  # /python/reference/#layout-annotations-x
-                xref="paper",  # /python/reference/#layout-annotations-xref
-                y=0,  # /python/reference/#layout-annotations-y
-                yref="paper"  # /python/reference/#layout-annotations-yref
-            )
-        ]
+        yaxis = dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
+        title="population * 1000"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+        )
+
     )
 
     figure = go.Figure(data=data, layout=layout)
@@ -270,7 +291,119 @@ def json_dataset_example(spark):
 
 
 
+#--------------------------------------------------------------------------------------------------------------
 
+
+
+
+    data1 = [
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=dates,  # more about "x":  /python/reference/#scatter-x
+            y=clientF,  # more about "y":  /python/reference/#scatter-y
+            name='population femme ',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(255,20,147)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=[2015, 2020],  # more about "x":  /python/reference/#scatter-x
+            y=[clientF[0], totalF / 1000],  # more about "y":  /python/reference/#scatter-y
+            name='evolution femme',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(0,191,255)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=dates,  # more about "x":  /python/reference/#scatter-x
+            y=clientH,  # more about "y":  /python/reference/#scatter-y
+            name='population homme ',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(0,0,222)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=[2015, 2020],  # more about "x":  /python/reference/#scatter-x
+            y=[clientH[0], totalH / 1000],  # more about "y":  /python/reference/#scatter-y
+            name='evolution homme',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(128, 0, 22)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        )
+    ]
+
+    layout1 = go.Layout(  # all "layout" attributes: /python/reference/#layout
+        title="population des multiple entre 10 et 14 ans en tunisie",
+        xaxis=dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
+            title="Annee"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+        ),
+        yaxis = dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
+        title="population * 1000"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+        )
+
+    )
+
+    figure1 = go.Figure(data=data1, layout=layout1)
+
+    py.plot(figure1, filename='graph1')
+
+    # --------------------------------------------------------------------------------------------------------------
+    cca=[]
+    for cc in client1 :
+      cca.append(cc *3)
+    cca1 = []
+    for cc1 in client2:
+        cca1.append(cc1 * 3)
+
+    data2 = [
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=dates,  # more about "x":  /python/reference/#scatter-x
+            y=cca,  # more about "y":  /python/reference/#scatter-y
+            name='candidat  ',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(47,79,79)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=[2015, 2020],  # more about "x":  /python/reference/#scatter-x
+            y=[cca[0], resultat*1.4],  # more about "y":  /python/reference/#scatter-y
+            name='evolution candidat',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(160,82,45)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=dates,  # more about "x":  /python/reference/#scatter-x
+            y=cca1,  # more about "y":  /python/reference/#scatter-y
+            name='candidat reussis ',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(50,205,50)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        ),
+        go.Scatter(  # all "scatter" attributes: https://plot.ly/python/reference/#scatter
+            x=[2015, 2020],  # more about "x":  /python/reference/#scatter-x
+            y=[cca1[0], resultat2 ],  # more about "y":  /python/reference/#scatter-y
+            name='evolution reussite',
+            marker=dict(  # marker is an dict, marker keys: /python/reference/#scatter-marker
+                color="rgb(160,82,45)"  # more about marker's "color": /python/reference/#scatter-marker-color
+            )
+        )
+    ]
+
+    layout2 = go.Layout(  # all "layout" attributes: /python/reference/#layout
+        title="candidat du concour de 6 eme annee  en tunisie",
+        xaxis=dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
+            title="Annee"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+        ),
+        yaxis = dict(  # all "layout's" "xaxis" attributes: /python/reference/#layout-xaxis
+        title="population * 1000"  # more about "layout's" "xaxis's" "title": /python/reference/#layout-xaxis-title
+        )
+
+    )
+
+    figure2 = go.Figure(data=data2, layout=layout2)
+
+
+    py.plot(figure2, filename='graph2')
 
     # x1 = client
     # x2 = clientH
@@ -354,7 +487,17 @@ def json_dataset_example(spark):
 #     # $example off:jdbc_dataset$
 #
 
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/')
+def api_root():
+    with open('populationAPI.json') as json_data:
+        d = json.load(json_data)
+    return json.dumps(d)
+
 if __name__ == "__main__":
+
     spark = SparkSession \
         .builder \
         .appName("Python Spark SQL data source example") \
@@ -364,6 +507,12 @@ if __name__ == "__main__":
     # parquet_example(spark)
     # parquet_schema_merging_example(spark)
     json_dataset_example(spark)
+
+
     # jdbc_dataset_example(spark)
 
     spark.stop()
+
+    app.run()
+
+    # app.run()
