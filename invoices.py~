@@ -32,7 +32,7 @@ import plotly.plotly as py
 from plotly.tools import FigureFactory as FF
 import numpy as np
 import plotly.tools as tls
-tls.set_credentials_file(username='chihebbha', api_key='bwHGtJcOShJgJdazD4Ws')
+tls.set_credentials_file(username='rajajlidi', api_key='tmlr1uss2q')
 
 
 resultatAPI={}

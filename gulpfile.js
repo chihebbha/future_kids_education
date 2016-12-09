@@ -8,13 +8,6 @@ var exec = require('child_process').exec;
 
 
 
-
-
-
-
-
-
-
 gulp.task('one', shell.task([
 
 
